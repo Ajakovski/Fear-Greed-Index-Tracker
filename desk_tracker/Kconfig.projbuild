@@ -1,0 +1,8 @@
+menu "Desk Tracker Configuration"
+    config WIFI_SSID
+        string "a"
+        default "myssid"
+    config WIFI_PASSWORD 
+        string "a"
+        default "mypassword"
+endmenu        
