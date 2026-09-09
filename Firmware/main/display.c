@@ -1,8 +1,9 @@
 #include "display.h"
 #include "pins.h"
+#include "rgb_led.h"
 
 #include "driver/spi_master.h"
-#include "driver/spi_master.h"
+#include "driver/gpio.h"
 #include "driver/ledc.h"
 #include "esp_lcd_panel_io.h"
 #include "esp_timer.h"
@@ -49,6 +50,23 @@ static lv_chart_series_t *s_chart_series[NUM_TABS];
 static lv_obj_t *s_chart[NUM_TABS];
 static lv_obj_t *s_battery_label;
 static int s_current_tab = 0;
+static float s_change_pct[NUM_TABS];
+static bool s_have_data[NUM_TABS];
+
+static void update_status_led(void){
+    if(!s_have_data[s_current_tab]){
+        rgb_led_off();
+        return;
+    }
+    float pct=s_change_pct[s_current_tab];
+    if(pct>0.005f){
+        rgb_led_set_all(0,180,0);
+    }else if(pct<-0.05f){
+        rgb_led_set_all(180,0,0);
+    }else{
+        rgb_led_set_all(120,100,0);
+    }
+}
 
 static void st7735_set_window(int x0, int y0, int x1,int y1){
     uint8_t caset[4] = {0x00,(uint8_t)x0,0x00,(uint8_t)x1};
@@ -109,7 +127,15 @@ static void backlight_init(void){
         .speed_mode=LEDC_LOW_SPEED_MODE,
         .duty_resolution=LEDC_TIMER_8_BIT,
         .timer_num=LEDC_TIMER_0,
-        .timer_sel=LEDC_TIMER_0,
+        freq_hz=5000,
+        clk_cfg=LEDC_AUTO_CLK,
+    };
+    ledc_timer_config(&timer_cfg);
+    ledc_channel_config_t chan_cfg={
+        .gpio_num=PIN_TFT_BL,
+        .speed_mode=LEDC_LOW_SPEED_MODE,
+        .channel=LEDC_CHANNEL_0,
+        .time_sel=LEDC_TIMER_0,
         .duty=255,
     };
     ledc_channel_config(&chan_cfg);
@@ -162,6 +188,7 @@ static void handle_msg(const display_msg_t *msg){
                 lv_chart_set_value_by_id(s_chart[i],s_chart_series[i],p,(int32_t)(msg->market.close[p]*100));
             }
             lv_chart_refresh(s_chart[i]);
+            if(i==s_current_tab) update_status_led();
             break;
         }
         case DISPLAY_MSG_BATTERY_PCT:{
@@ -184,6 +211,7 @@ static void handle_msg(const display_msg_t *msg){
 static void display_task(void *arg){
     panel_init();
     backlight_init();
+    rgb_led_init();
     lv_init();
     static uint8_t lvgl_buf[128*LVGL_BUF_LINES*2];
     s_disp=lv_display_create(128,160);
@@ -210,6 +238,10 @@ void display_post_msg(const display_msg_t *msg){
     if(s_msg_queue){
         xQueueSemd(s_msg_queue,msg,pdMS_TO_TICKS(100));
     }
+}
+
+void display_refresh_led(void){
+    update_status_led();
 }
 
 esp_err_t display_init(void){

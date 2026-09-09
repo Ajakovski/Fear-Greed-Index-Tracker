@@ -1,32 +1,42 @@
 #include "wifi_mgr.h"
-#include <stdio.h>
+#include "buttons.h"
+#include "data_fetch.h"
+#include "display.h"
+#include "fuelgauge.h"
+#include "rgb_led.h"
+#include "pins.h"
 #include "nvs_flash.h"
 #include "esp_log.h"
+#include "esp_sleep.h"
+#include "esp_wifi.h"
+#include "driver/rtc_io.h"
+#include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/queue.h"
 
 static const char *TAG="main";
 
-void app_main(void)
-{
-    esp_err_t ret=nvs_flash_init();
-    if(ret==ESP_ERR_NVS_NO_FREE_PAGES || ret==ESP_ERR_NVS_NEW_VERSION_FOUND){
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ret=nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
+static void enter_deep_sleep(void){
+    ESP_LOGI(TAG,"entering deep sleep");
+    rgb_led_off();
+    rtc_gpio_pullup_en(PIN_BTN_POWER);
+    rtc_gpio_pulldown_dis(PIN_BTN_POWER);
+    esp_sleep_enable_ext0_wakeup(PIN_BTN_POWER,0);
+    esp_deep_sleep_start();
+}
 
-    ESP_ERROR_CHECK(wifi_mgr_init());
+static void enter_light_sleep(void){
+    ESP_LOGI((TAG,"entering light sleep"));
+    display_set_backlight(0);
+    rgb_led_off();
+    esp_wifi_stop();
 
-    ESP_LOGI(TAG, "waiting for wifi...");
-    if(wifi_mgr_wait_connected(pdMS_TO_TICKS(15000))){
-        ESP_LOGI(TAG, "wifi connected");
-    }else{
-        ESP_LOGW(TAG, "still waiting after 15s, it'll keep retrying in the background");
-    }
-
-    while (1){
-        vTaskDelay(pdMS_TO_TICKS(10000));
-        ESP_LOGI(TAG, "alive, wifi connected: %s", wifi_mgr_is_connected()?"yes":"no");
-    }
+    gpio_wakeup_enable(PIN_BTN_POWER, GPIO_INTR_LOW_LEVEL);
+    esp_sleep_enable_gpio_wakeup();
+    esp_light_sleep_start();
+    esp_wifi_start();
+    display_set_backlight(255);
+    display_refresh_led();
+    ESP_LOGI(TAG,"woke from light sleep"); 
 }

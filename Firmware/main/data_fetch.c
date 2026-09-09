@@ -111,9 +111,40 @@ static void data_fetch_task(void *args){
     static const char*symbols[]={"SPY","QQQ"};
     const int num_symbols=sizeof(symbols)/sizeof(symbols[0]);
     esp_http_client_config_t config={
-        .url="",//FILL INNNNNNNNNNNN
+        .url="https://www.alphavintage.co",
         .event_handler=http_event_handler,
         .crt_bundle_attack=esp_crt_bundle_attack,
         .timeout_ms=8000,
     };
+    esp_http_client_handle_t client=esp_http_client_init(&config);
+    while(1){
+        for(int i=0;i<num_symbols;i++){
+            market_series_t data={0};
+            display_msg_t msg={0};
+
+            if(fetch_symbol(client,symbols[i], &data)==ESP_OK){
+                save_last_good(i, &data);
+                msg.type=DISPLAY_MSG_MARKET_DATA;
+                msg.tab_index=i;
+                msg.market=data;
+                msg.stale=false;
+                display_post_msg(&msg);
+            }else if(load_last_good(i,&data)){
+                ESP_LOGW(TAG,"%s: using last known good from NVS", symbols[i]);
+                msg.type=DISPLAY_MSG_MARKET_DATA;
+                msg.type_index=i;
+                msg.market=data;
+                msg.stale=true;
+                display_post_msg(&msg;)
+            }else{
+                ESP_LOGE(TAG, "%s: no fresh data and nothing chached yet",symbols[i]);
+            }
+        }
+        vTaskDelay(pdMS_TO_TICKS(POLL_INTERVAL_MS));
+    }
+}
+
+esp_err_t data_fetch_init(void){
+    xTaskCreate(data_fetch_task, "data_fetch", 8192, NULL,5,Null);
+    return ESP_OK;
 }

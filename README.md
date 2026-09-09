@@ -4,8 +4,8 @@
 
 <p>
 
-<img src="" width="40%" height="500">
-<img src="" width="40%" height="450">
+<img src="Pictures/Gadget.png" width="45%" height="500">
+<img src="Pictures/Transparent_gadget.png" width="45%" height="500">
 </p>
 
 ### _Live tracker on your desk displaying how the market *FEELS*._
@@ -65,7 +65,7 @@ Built as an open-source hardware product - every schematic and line of firmware 
 ***A visual representation of the whole project has been given with the file:***
 
 ```bash
-Hardware/XXXXX.step
+Hardware/Gadget.step
 ```
 
 ***If you dont prefer the files view you can always refer to the visual representation via [OnShape](https://cad.onshape.com/documents/b0f9f3ad3455fa4c269f5d70/w/b12c68eb17b42f73cf325935/e/728434c4884acb47f862d1fd?renderMode=0&uiState=6a8efb587598d3d7533a051f)***
@@ -240,9 +240,9 @@ Thanks to the newest tarrifs by our president (20% tax import on international g
 
 # KiCAD Design
 
-***Refer to the PDF file for better overview*** [PDF](Pictures/Schematic_Print.pdf)
+***Refer to the PDF file for better overview*** [PDF](Pictures/Schematic.pdf)
 
-<img src="./Pictures/Main_Sch.png" width="100">
+<img src="./Pictures/Schematic.png" width="100%">
 
 ---
 
