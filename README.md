@@ -268,9 +268,35 @@ Firmware features:
 Fear_Greed_Index/
 |--- Firmware/
 |    |--- main/
-|        |--- main.c/
+|    |    |--- main.c
+|    |    |--- CMakeLists.txt
+|    |    |--- Kconfig.projbuild
+|    |    |--- idf_component.yml
+|    |    |--- pins.h
+|    |    |--- wifi_mgr.h
+|    |    |--- wifi_mgr.c
+|    |    |--- buttons.h
+|    |    |--- buttons.c
+|    |    |--- fuelgauge.h
+|    |    |--- fuelgauge.c
+|    |    |--- data_fetch.h
+|    |    |--- display.h
+|    |    |--- display.c
+|    |    |--- rgb_led.h
+|    |    |--- rgb_led.c
 |    |--- CMakeLists.txt
 |    |--- sdkconfig
+|    |--- .gitignore
+|    |--- sdkconfig.old
+|    |--- dependencies.lock
+|    |    |--- build/
+|    |    |--- managed_components/
+|    |    |--- .vscode/
+|    |    |    |--- c_cpp_properties.json
+|    |    |    |--- settings.json
+|    |    |    |--- launch.json
+|    |    |--- debugging/
+|    |    |    |--- tasks.json
 |--- Hardware/
 |    |--- 3D_Printing/
 |    |--- KiCad/
@@ -341,7 +367,7 @@ Main focus while building the project:
 
 This project is licensed under the **MIT License** - see [LICENSE](LICENSE) for full terms.
 
-API used: ....
+API used: AlphaVintage - [LINK](https://www.alphavantage.co/)
 
 ---
 
