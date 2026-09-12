@@ -14,4 +14,4 @@
 #define PIN_FG_SCL 17
 #define PIN_FG_ALRT 35
 
-#define PIN_RGB_DIN 14
+#define PIN_RGB_LED_DIN 14
