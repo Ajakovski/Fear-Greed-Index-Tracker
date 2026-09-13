@@ -1,4 +1,4 @@
-menu "Desk Tracker Configuration"
+menu "Fear and Greed Configuration"
     config WIFI_SSID
         string "a"
         default "myssid"
